@@ -1,0 +1,222 @@
+float [] a,b,c,vx,vy;
+float emoji_x, emoji_y; 
+float emoji_d=10;
+int score = 0;
+int timing = 600;
+block[] cats, seals;
+player emo;
+///value define
+void setup() {
+  size(1000, 800);
+  
+  a= new float[4];
+  b=new float[4];
+  c=new float[4];
+  vx=new float[4];
+  vy=new float[4];
+  
+  for(int i=0;i<4;i++){
+  a[i]=100*(i+1);b[i]=200*(i+1);c[i]=2*(i+1);
+  vx[i]=5;vy[i]=3*(i+1);}
+
+  emoji_x = 500;
+  emoji_y = 400;
+
+}
+
+void draw() {
+  background(80,220,20);
+
+///make emoji
+  emo = new player(emoji_x, emoji_y);
+  emo.moveEmoji();
+  emo.display();
+  emo.moveEmoji();
+
+///draw shape
+cats = new block[2];
+seals = new block[2];
+for (int i=0;i<2;i++){
+  cats[i]= new block(a[i],b[i],c[i]);
+  seals[i]=new block(a[i+2],b[i+2],c[i+2]);
+  cats[i].cat();
+  seals[i].seal();
+}
+
+///update shape location
+  updateShapePosition();
+
+///checkdistance
+  checkCollision();
+
+///show score and time
+  displayScore();
+  time();
+
+///check game over
+  if (timing == 0) {
+    gameOver();
+  }
+}
+
+///random
+void updateShapePosition() {
+for(int i=0;i<4;i++){
+  a[i]+=vx[i];
+  b[i]+=vy[i];
+}
+}
+ 
+void checkCollision() {
+ 
+  for(int i=0;i<4;i++){
+    if(a[i]>width||a[i]<0) vx[i]=-vx[i];
+    if(b[i]>height||b[i]<0) vy[i]=-vy[i];
+  }
+
+///distance calculation and score increase
+
+for(int i=0;i<2;i++){
+  if( dist(a[i],b[i],emoji_x,emoji_y)<c[i]*3 + emoji_d){
+    emoji_x = random(0, 1000);
+    emoji_y = random(0,800);
+    score += 10;}
+ }
+    
+  for(int i=2;i<4;i++){
+  if( dist(a[i],b[i],emoji_x,emoji_y)<c[i]*3+emoji_d){
+    emoji_x = random(0,1000);
+    emoji_y = random(0,800);
+    score += 20;}
+  }
+}
+
+
+///show the time and score 
+void displayScore() {
+  fill(0);
+  textSize(24);
+  text("Score: " + score, 10, 30);
+  text("Time: " + timing / 20, 550, 30);
+}
+///time speed
+void time() {
+  if (frameCount % 1.5 == 0 && timing > 0) {
+    timing--;
+  }
+}
+///over part of  text size location,and textbox color 
+void gameOver() {
+  fill(100, 80, 240);
+  noStroke();
+  rect(100, 400, 450, 60);
+  fill(0);
+  textSize(24);
+  text("You get", 100, 440);
+  text(score, 450, 440);
+  noLoop();
+}
+
+class player{
+   float x, y, d;  
+   player(float a, float b){x = a; y = b; d = 10;}
+  void display() {
+   fill(250, 10, 100);
+   ellipse(x, y, d * 10, d * 8);
+   stroke(180, 150, 100); // face
+
+   fill(150, 120, 90);
+   circle(x - 2 * d, y - 0.7 * d, d * 1.5);
+   circle(x + 2 * d, y - 0.7 * d, d * 1.5); // eye
+
+   fill(25, 10, 90);
+   arc(x, y, d, d * 2, 0, PI / 2); // nose
+
+   fill(10, 120, 255);
+   arc(x, y + d * 1.5, d * 1.5, d * 2, 0, PI); // mouth
+   fill(255);
+   }
+   
+ void moveEmoji() {
+  if (keyPressed) {
+    float new_x = emoji_x;
+    float new_y = emoji_y;
+
+    if (key == 'a' && emoji_x > 0) {
+      new_x -= 10;
+    }
+    if (key == 'd' && emoji_x < width) {
+      new_x += 10;
+    }
+    if (key == 'w' && emoji_y > 0) {
+      new_y -= 10;
+    }
+    if (key == 's' && emoji_y < height) {
+      new_y += 10;
+    }
+
+    // Update emoji position
+    emoji_x = new_x;
+    emoji_y = new_y;
+  }
+   }
+    }
+   
+
+
+class block{
+  float x, y, d;
+  
+   block(float x, float y, float d) {
+    this.x = x;
+    this.y = y;
+    this.d = d;
+  }
+  
+   void seal() {
+    this.d = d/2.5;
+    ellipse(x, y, 40*d, 30*d);
+    //물범 코
+    strokeWeight(5);
+    triangle(x-2*d, y, x, y+4*d, x+2*d, y);
+    strokeWeight(3);
+    point(x-d, y+5);
+    point(x+d, y+5);
+    //물범 입
+    line(x, y+4*d, x, y+6*d);
+    arc(x-4*d, y+6*d, 8*d, 8*d, 0, PI/2);
+    arc(x+4*d, y+6*d, 8*d, 8*d, PI/2, PI);
+    //물범 눈
+    circle(x-10*d, y-5*d, 12*d);
+    circle(x+10*d, y-5*d, 12*d);
+    fill(0, 0, 0);
+    circle(x-10*d, y-5*d, 10*d);
+    circle(x+10*d, y-5*d, 10*d);
+    fill(255, 255, 255);
+    circle(x-8*d, y-8*d, d);
+    circle(x+12*d, y-8*d, d);
+    //물범 수염
+    line(x-10*d, y+2*d, x-24*d, y+4*d);
+    line(x-10*d, y+3*d, x-24*d, y+6*d);
+    line(x+10*d, y+2*d, x+24*d, y+4*d);
+    line(x+10*d, y+3*d, x+24*d, y+6*d);
+  }
+  
+  void cat(){
+    triangle(x-8*d, y-3*d, x-8*d, y-8*d, x-3*d, y-3*d);   //귀
+    triangle(x+8*d, y-3*d, x+8*d, y-8*d, x+3*d, y-3*d);
+    ellipse(x, y, 18*d, 15*d); //머리
+    line(x+5*d, y+3*d, x+10*d, y+3*d); //수염
+    line(x+5*d, y+4*d, x+10*d, y+4*d);
+    line(x+5*d, y+2*d, x+10*d, y+2*d);
+    line(x-5*d, y+3*d, x-10*d, y+3*d);
+    line(x-5*d, y+4*d, x-10*d, y+4*d);
+    line(x-5*d, y+2*d, x-10*d, y+2*d);
+    arc(x-0.5*d, y+1.5*d, d, 2*d, 0, PI); //입
+    arc(x+0.5*d, y+1.5*d, d, 2*d, 0, PI);
+    fill(0);
+    circle(x+4*d, y-d, 1.5*d);      //눈
+    circle(x-4*d, y-d, 1.5*d);
+    fill(255);
+  }
+}
